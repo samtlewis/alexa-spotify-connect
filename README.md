@@ -6,7 +6,7 @@ This means that the user doesn't have to list devices, specify a device etc - wh
 
 ## Dev / deployment details
 1. Make a Spotify developer app at developer.spotify.com, get a client ID and client secret
-2. Make a new Amazon Alexa skill, custom. (lots of details omitted here; you can run skill.js and change 'intent' to 'name' and paste over the intent array of the JSON)
+2. Make a new Amazon Alexa skill, custom. Lots of details omitted here, but: once you get to the part in the Alexa developer console where you can upload/paste in JSON, then check out `skill/skill.json`
 3. Account linking on Alexa skill: turn it on, choose "Auth Code Grant", set Authorization URI to "https://accounts.spotify.com/authorize", set "Access Token URI" to "https://accounts.spotify.com/api/token", set client ID and secret, add scopes "user-read-playback-state" and "user-modify-playback-state", add three redirect URIs:
 https://alexa.amazon.co.jp/api/skill/link/M1OP8C9N8NBYP7
 https://pitangui.amazon.com/api/skill/link/M1OP8C9N8NBYP7

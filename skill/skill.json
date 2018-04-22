@@ -1,0 +1,104 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "living room",
+            "intents": [
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "ResumeIntent",
+                    "slots": [],
+                    "samples": [
+                        "continue",
+                        "unpause",
+                        "resume"
+                    ]
+                },
+                {
+                    "name": "PauseIntent",
+                    "slots": [],
+                    "samples": [
+                        "stop",
+                        "pause"
+                    ]
+                },
+                {
+                    "name": "SkipNextIntent",
+                    "slots": [],
+                    "samples": [
+                        "forwards",
+                        "next",
+                        "skip"
+                    ]
+                },
+                {
+                    "name": "SkipPreviousIntent",
+                    "slots": [],
+                    "samples": [
+                        "backwards",
+                        "previous",
+                        "last",
+                        "back"
+                    ]
+                },
+                {
+                    "name": "VolumeLevelIntent",
+                    "slots": [
+                        {
+                            "name": "VOLUMELEVEL",
+                            "type": "AMAZON.NUMBER"
+                        }
+                    ],
+                    "samples": [
+                        "set the volume level to {VOLUMELEVEL}",
+                        "set volume level to {VOLUMELEVEL}",
+                        "volume level to {VOLUMELEVEL}",
+                        "set the volume to {VOLUMELEVEL}",
+                        "set volume to {VOLUMELEVEL}",
+                        "volume to {VOLUMELEVEL}",
+                        "set the volume level {VOLUMELEVEL}",
+                        "set volume level {VOLUMELEVEL}",
+                        "volume level {VOLUMELEVEL}",
+                        "set the volume {VOLUMELEVEL}",
+                        "set volume {VOLUMELEVEL}",
+                        "volume {VOLUMELEVEL}"
+                    ]
+                },
+                {
+                    "name": "PlayIntent",
+                    "slots": [],
+                    "samples": [
+                        "play",
+                        "play the music",
+                        "transfer playback",
+                        "transfer"
+                    ]
+                },
+                {
+                    "name": "GetTrackIntent",
+                    "slots": [],
+                    "samples": [
+                        "what song is this",
+                        "what is playing",
+                        "what's playing",
+                        "what is this song",
+                        "what's this song",
+                        "what track is this",
+                        "what is this"
+                    ]
+                }
+            ],
+            "types": []
+        }
+    }
+}
