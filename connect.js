@@ -44,7 +44,7 @@ app.pre = function (req, res, type) {
     }
     // Check that the user has an access token, if they have linked their account
     if (!(req.context.System.user.accessToken || req.getSession().details.user.accessToken)) {
-        res.say(i18n.__("You have not linked your Spotify account, check your Alexa app to link the account"));
+        res.say(i18n.__("Oops, please make sure you've linked your spotify account in the alexa app."));
         res.linkAccount();
     }
 };
@@ -236,7 +236,8 @@ app.intent('VolumeLevelIntent', {
 // No slots required
 app.intent('PlayIntent', {
     "utterances": [
-        "play"
+        "play {the music|}",
+        "transfer {playback|}"
     ]
 },
     function (req, res) {
