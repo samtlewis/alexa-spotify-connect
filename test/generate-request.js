@@ -3,7 +3,7 @@ module.exports = {
         return {
             "session": {
                 "application": {
-                    "applicationId": "amzn1.ask.skill.33d79728-0f5a-44e7-ae22-ccf0b0c0e9e0"
+                    "applicationId": "amzn1.ask.skill.cff2d0af-01a4-4e24-a05d-4e6b641abd48"
                 },
                 "user": {
                     "accessToken": accessToken || null
@@ -19,7 +19,7 @@ module.exports = {
             "context": {
                 "System": {
                     "application": {
-                        "applicationId": "amzn1.ask.skill.33d79728-0f5a-44e7-ae22-ccf0b0c0e9e0"
+                        "applicationId": "amzn1.ask.skill.cff2d0af-01a4-4e24-a05d-4e6b641abd48"
                     },
                     "user": {
                         "userId": "amzn1.ask.account.VOID",
@@ -34,7 +34,7 @@ module.exports = {
             "session": {
                 "new": newSession || false,
                 "application": {
-                    "applicationId": "amzn1.ask.skill.33d79728-0f5a-44e7-ae22-ccf0b0c0e9e0"
+                    "applicationId": "amzn1.ask.skill.cff2d0af-01a4-4e24-a05d-4e6b641abd48"
                 },
                 "user": {
                     "accessToken": accessToken || null
@@ -52,7 +52,7 @@ module.exports = {
             "context": {
                 "System": {
                     "application": {
-                        "applicationId": "amzn1.ask.skill.33d79728-0f5a-44e7-ae22-ccf0b0c0e9e0"
+                        "applicationId": "amzn1.ask.skill.cff2d0af-01a4-4e24-a05d-4e6b641abd48"
                     },
                     "user": {
                         "userId": "amzn1.ask.account.VOID",
@@ -66,7 +66,7 @@ module.exports = {
         return {
             "session": {
                 "application": {
-                    "applicationId": applicationId || "amzn1.ask.skill.33d79728-0f5a-44e7-ae22-ccf0b0c0e9e0"
+                    "applicationId": applicationId || "amzn1.ask.skill.cff2d0af-01a4-4e24-a05d-4e6b641abd48"
                 },
                 "user": {}
             },
@@ -93,7 +93,7 @@ module.exports = {
             "context": {
                 "System": {
                     "application": {
-                        "applicationId": "amzn1.ask.skill.33d79728-0f5a-44e7-ae22-ccf0b0c0e9e0"
+                        "applicationId": "amzn1.ask.skill.cff2d0af-01a4-4e24-a05d-4e6b641abd48"
                     },
                     "user": {
                         "userId": "amzn1.ask.account.VOID",

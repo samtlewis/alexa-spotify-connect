@@ -1,13 +1,12 @@
 {
-  "name": "alexa-spotify-connect",
+  "name": "alexa-spotify-connect-living-room",
   "version": "1.0.0",
-  "description": "Control Spotify Connect devices with Alexa",
-  "author": "Lawrence Thorpe",
+  "description": "Control Spotify Connect device Living Room",
+  "author": "Tim Carr",
   "dependencies": {
     "alexa-app": "^4.0.1",
     "express": "^4.15.3",
     "i18n": "^0.8.3",
-    "node-cache": "^4.1.1",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.5"
   },
@@ -28,10 +27,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thorpelawrence/alexa-spotify-connect.git"
+    "url": "git+https://github.com/xaphod/alexa-spotify-connect.git"
   },
   "alexa": {
-    "applicationId": "amzn1.ask.skill.33d79728-0f5a-44e7-ae22-ccf0b0c0e9e0"
+    "applicationId": "amzn1.ask.skill.cff2d0af-01a4-4e24-a05d-4e6b641abd48"
   },
   "jest": {
     "coverageReporters": [

@@ -1,13 +1,13 @@
 var alexa = require('alexa-app');
 var request = require('request-promise-native');
 var express = require('express');
-var nodecache = require('node-cache');
 var i18n = require('i18n');
+
+// DEVICE NAME
+var deviceNameToUse = 'Living Room';
 
 // Create instance of express
 var express_app = express();
-// Create a 1 hour cache for storing user devices
-var cache = new nodecache({ stdTTL: 3600, checkperiod: 120 });
 // Create instance of alexa-app
 var app = new alexa.app('connect');
 // Bind alexa-app to express instance
@@ -16,6 +16,18 @@ app.express({ expressApp: express_app });
 i18n.configure({
     directory: __dirname + '/locales'
 });
+
+var pause = function (req, res) {
+    // PUT to Spotify REST API
+    return request.put("https://api.spotify.com/v1/me/player/pause", {
+        resolveWithFullResponse: true
+    }).auth(null, null, true, req.getSession().details.user.accessToken)
+        .then((r) => {
+            req.getSession().set("statusCode", r.statusCode);
+        }).catch((err) => {
+            if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
+        });
+}
 
 // Run every time the skill is accessed
 app.pre = function (req, res, type) {
@@ -42,8 +54,7 @@ app.post = function (req, res, type, exception) {
 
 // Function for when skill is invoked without intent
 app.launch(function (req, res) {
-    res.say(i18n.__("I can control your Spotify Connect devices, to start, ask me to list your devices"))
-        .reprompt(i18n.__("To start, ask me to list your devices"));
+    res.say(i18n.__("I can control your spotify connect device called " + deviceNameToUse));
     // Keep session open
     res.shouldEndSession(false);
 });
@@ -54,8 +65,7 @@ app.intent("AMAZON.HelpIntent", {
     "slots": {},
     "utterances": []
 }, function (req, res) {
-    res.say(i18n.__("You can ask me to list your connect devices and then control them. "))
-        .say(i18n.__("For example, tell me to play on a device number after listing devices"))
+    res.say(i18n.__("Try asking me to play your favorite song. You need a spotify connect device called " + deviceNameToUse))
         .reprompt(i18n.__("What would you like to do?"));
     // Keep session open
     res.shouldEndSession(false);
@@ -66,9 +76,9 @@ app.intent("AMAZON.HelpIntent", {
 app.intent("AMAZON.StopIntent", {
     "slots": {},
     "utterances": []
-}, function (req, res) {
-    return;
-});
+}, 
+    pause
+);
 
 // Handle default Amazon cancel intent
 // No slots or utterances required
@@ -79,13 +89,13 @@ app.intent("AMAZON.CancelIntent", {
     return;
 });
 
-// Handle play intent
+// Handle resume intent
 // No slots required
-app.intent('PlayIntent', {
+app.intent('ResumeIntent', {
     "utterances": [
-        "play",
         "resume",
-        "continue"
+        "continue",
+        "unpause"
     ]
 },
     function (req, res) {
@@ -109,17 +119,7 @@ app.intent('PauseIntent', {
         "pause"
     ]
 },
-    function (req, res) {
-        // PUT to Spotify REST API
-        return request.put("https://api.spotify.com/v1/me/player/pause", {
-            resolveWithFullResponse: true
-        }).auth(null, null, true, req.getSession().details.user.accessToken)
-            .then((r) => {
-                req.getSession().set("statusCode", r.statusCode);
-            }).catch((err) => {
-                if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
-            });
-    }
+    pause
 );
 
 // Handle skip next intent
@@ -228,14 +228,11 @@ app.intent('VolumeLevelIntent', {
     }
 );
 
-// Handle get devices intent
+// Handle play intent
 // No slots required
-app.intent('GetDevicesIntent', {
+app.intent('PlayIntent', {
     "utterances": [
-        "devices",
-        "list",
-        "search",
-        "find"
+        "play"
     ]
 },
     function (req, res) {
@@ -251,217 +248,46 @@ app.intent('GetDevicesIntent', {
         })
             .then(function (body) {
                 var devices = body.devices || [];
-                var deviceNames = [];
+                var foundDevice;
                 for (var i = 0; i < devices.length; i++) {
-                    // Number each device
-                    deviceNames.push((i + 1) + ". " + devices[i].name);
-                    // Add the device number to JSON
-                    devices[i].number = (i + 1);
+                    if (devices[i].name === deviceNameToUse) {
+                        foundDevice = devices[i];
+                    }
                 }
-                req.getSession().set("devices", devices);
-                cache.set(req.getSession().details.user.userId + ":devices", devices);
-                // Check if user has devices
-                if (devices.length > 0) {
-                    // Comma separated list of device names
-                    res.say(i18n.__("I found these connect devices: "))
-                        .say([deviceNames.slice(0, -1).join(', '), deviceNames.slice(-1)[0]].join(deviceNames.length < 2 ? '' : ',' + i18n.__(' and ')) + ". ")
-                        .say(i18n.__("What would you like to do with these devices?")).reprompt(i18n.__("What would you like to do?"));
-                    // Keep session open
-                    res.shouldEndSession(false);
-                }
-                else {
-                    // No devices found
-                    res.say(i18n.__("I couldn't find any connect devices, check your Alexa app for information on connecting a device"));
-                    res.card({
-                        type: "Simple",
-                        title: i18n.__("Connecting to a device using Spotify Connect"),
-                        content: i18n.__("To add a device to Spotify Connect,"
-                            + " log in to your Spotify account on a supported device"
-                            + " such as an Echo, phone, or computer"
-                            + "\nhttps://support.spotify.com/uk/article/spotify-connect/")
+                if (foundDevice) {
+                    req.getSession().set("device", foundDevice);
+
+                    // PUT to Spotify REST API
+                    return request.put({
+                        url: "https://api.spotify.com/v1/me/player",
+                        // Send access token as bearer auth
+                        auth: {
+                            "bearer": req.getSession().details.user.accessToken
+                        },
+                        body: {
+                            // Send device ID
+                            "device_ids": [
+                                foundDevice.id
+                            ],
+                            // Make sure that music plays
+                            "play": true
+                        },
+                        // Handle sending as JSON
+                        json: true
+                    }).then((r) => {
+                        res.say(i18n.__("OK"));
+                    }).catch((err) => {
+                        if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
                     });
+
+                } else { // no foundDevice
+                    res.say(i18n.__("I could not find the spotify connect device called " + deviceNameToUse));
                 }
             })
             // Handle errors
             .catch(function (err) {
                 req.getSession().set("statusCode", err.statusCode);
             });
-    }
-);
-
-// Handle device play intent
-// Slot for device number
-app.intent('DevicePlayIntent', {
-    "slots": {
-        "DEVICENUMBER": "AMAZON.NUMBER"
-    },
-    "utterances": [
-        "play on {number|device|device number|} {-|DEVICENUMBER}"
-    ]
-},
-    function (req, res) {
-        // Check that request contains session
-        if (req.hasSession()) {
-            // Check that the slot has a value
-            if (req.slot("DEVICENUMBER")) {
-                // Check if the slot is a number
-                if (!isNaN(req.slot("DEVICENUMBER"))) {
-                    var deviceNumber = req.slot("DEVICENUMBER");
-                    // Check if session is new
-                    if (req.getSession().isNew()) {
-                        // If new session try to use cache
-                        var devices = cache.get(req.getSession().details.user.userId + ":devices") || [];
-                    }
-                    else {
-                        // If existing session use session data
-                        var devices = req.getSession().get("devices") || [];
-                    }
-                    var deviceId, deviceName;
-                    // Iterate through devices to find ID and name by number
-                    for (var i = 0; i < devices.length; i++) {
-                        if (devices[i].number == deviceNumber) {
-                            deviceId = devices[i].id;
-                            deviceName = devices[i].name;
-                        }
-                    }
-                    // Check that the device for the number was found
-                    if (deviceId) {
-                        // PUT to Spotify REST API
-                        return request.put({
-                            url: "https://api.spotify.com/v1/me/player",
-                            // Send access token as bearer auth
-                            auth: {
-                                "bearer": req.getSession().details.user.accessToken
-                            },
-                            body: {
-                                // Send device ID
-                                "device_ids": [
-                                    deviceId
-                                ],
-                                // Make sure that music plays
-                                "play": true
-                            },
-                            // Handle sending as JSON
-                            json: true
-                        }).then((r) => {
-                            res.say(i18n.__("Playing on device {{deviceNumber}}: {{deviceName}}", { deviceNumber, deviceName }));
-                        }).catch((err) => {
-                            if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
-                        });
-                    }
-                    else {
-                        // If device for number not found
-                        res.say(i18n.__("I couldn't find device {{deviceNumber}}. ", { deviceNumber }))
-                            .say(i18n.__("Try asking me to list devices first"));
-                        // Keep session open
-                        res.shouldEndSession(false);
-                    }
-                }
-                else {
-                    // Not a number
-                    res.say(i18n.__("I couldn't work out which device to play on, make sure you refer to the device by number."))
-                        .say(i18n.__("Try asking me to play on a device number"))
-                        .reprompt(i18n.__("What would you like to do?"));
-                    // Keep session open
-                    res.shouldEndSession(false);
-                }
-            }
-            else {
-                // No slot value
-                res.say(i18n.__("I couldn't work out which device number to play on."))
-                    .say(i18n.__("Try asking me to play on a device number"))
-                    .reprompt(i18n.__("What would you like to do?"));
-                // Keep session open
-                res.shouldEndSession(false);
-            }
-        }
-    }
-);
-
-// Handle device transfer intent
-// Slot for device number
-app.intent('DeviceTransferIntent', {
-    "slots": {
-        "DEVICENUMBER": "AMAZON.NUMBER"
-    },
-    "utterances": [
-        "transfer to {number|device|device number|} {-|DEVICENUMBER}"
-    ]
-},
-    function (req, res) {
-        // Check that request contains session
-        if (req.hasSession()) {
-            // Check that the slot has a value
-            if (req.slot("DEVICENUMBER")) {
-                // Check if the slot is a number
-                if (!isNaN(req.slot("DEVICENUMBER"))) {
-                    var deviceNumber = req.slot("DEVICENUMBER");
-                    // Check if session is new
-                    if (req.getSession().isNew()) {
-                        // If new session try to use cache
-                        var devices = cache.get(req.getSession().details.user.userId + ":devices") || [];
-                    }
-                    else {
-                        // If existing session use session data
-                        var devices = req.getSession().get("devices") || [];
-                    }
-                    var deviceId, deviceName;
-                    // Iterate through devices to find ID and name by number
-                    for (var i = 0; i < devices.length; i++) {
-                        if (devices[i].number == deviceNumber) {
-                            deviceId = devices[i].id;
-                            deviceName = devices[i].name;
-                        }
-                    }
-                    // Check that the device for the number was found
-                    if (deviceId) {
-                        // PUT to Spotify REST API
-                        return request.put({
-                            url: "https://api.spotify.com/v1/me/player",
-                            // Send access token as bearer auth
-                            auth: {
-                                "bearer": req.getSession().details.user.accessToken
-                            },
-                            body: {
-                                // Send device ID
-                                "device_ids": [
-                                    deviceId
-                                ]
-                            },
-                            // Handle sending as JSON
-                            json: true
-                        }).then((r) => {
-                            res.say(i18n.__("Transferring to device {{deviceNumber}}: {{deviceName}}", { deviceNumber, deviceName }));
-                        }).catch((err) => {
-                            if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
-                        });
-                    }
-                    else {
-                        // If device for number not found
-                        res.say(i18n.__("I couldn't find device {{deviceNumber}}. ", { deviceNumber }))
-                            .say(i18n.__("Try asking me to list devices first"));
-                        // Keep session open
-                        res.shouldEndSession(false);
-                    }
-                }
-                else {
-                    // Not a number
-                    res.say(i18n.__("I couldn't work out which device to transfer to, make sure you refer to the device by number."))
-                        .say(i18n.__("Try asking me to transfer to a device number"))
-                        .reprompt(i18n.__("What would you like to do?"));
-                    // Keep session open
-                    res.shouldEndSession(false);
-                }
-            }
-            else {
-                // No slot value
-                res.say(i18n.__("I couldn't work out which device number to transfer to."))
-                    .say(i18n.__("Try asking me to transfer to a device number"))
-                    .reprompt(i18n.__("What would you like to do?"));
-                // Keep session open
-                res.shouldEndSession(false);
-            }
-        }
     }
 );
 
@@ -510,7 +336,7 @@ app.intent('GetTrackIntent', {
 express_app.use(express.static(__dirname));
 /* istanbul ignore next */
 express_app.get('/', function (req, res) {
-    res.redirect('https://github.com/thorpelawrence/alexa-spotify-connect');
+    res.redirect('https://github.com/xaphod/alexa-spotify-connect');
 });
 
 /* istanbul ignore if */

@@ -1,24 +1,8 @@
 # alexa-spotify-connect (Connect Control for Spotify)
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/thorpelawrence/alexa-spotify-connect.svg)](https://greenkeeper.io/)
-
-[![Build Status](https://travis-ci.org/thorpelawrence/alexa-spotify-connect.svg?branch=master)](https://travis-ci.org/thorpelawrence/alexa-spotify-connect)
-[![Maintainability](https://api.codeclimate.com/v1/badges/e8e6719b56106b6c5162/maintainability)](https://codeclimate.com/github/thorpelawrence/alexa-spotify-connect/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/e8e6719b56106b6c5162/test_coverage)](https://codeclimate.com/github/thorpelawrence/alexa-spotify-connect/test_coverage)
-[![Coverage Status](https://coveralls.io/repos/github/thorpelawrence/alexa-spotify-connect/badge.svg?branch=master)](https://coveralls.io/github/thorpelawrence/alexa-spotify-connect?branch=master)
-
-![](resources/icon108.png)
-
-**Control Spotify Connect devices with Alexa**
-
-## Alexa Skill Store
-**UK**: https://www.amazon.co.uk/Lawrence-Thorpe-Connect-Control-Spotify/dp/B074KFNWFD  
-**US**: https://www.amazon.com/Lawrence-Thorpe-Connect-Control-Spotify/dp/B074KFNWFD
-
-## Contribution
-The utility script `skill.js` is provided to generate the intent schema and sample utterances from source
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+** FORKED FROM https://github.com/thorpelawrence/alexa-spotify-connect **
+The purpose of this fork is to limit the devices controller to a single device, specified at the top of `connect.js`.
+This means that the user doesn't have to list devices, specify a device etc - whenever a song is played, it is played to this device.
 
 ## License
 [MIT](LICENSE)

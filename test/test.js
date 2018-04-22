@@ -63,16 +63,16 @@ describe('AMAZON.HelpIntent', () => {
     });
 });
 
-describe('AMAZON.StopIntent', () => {
-    test('should return nothing', () => {
-        var req = generateRequest.intentRequest('AMAZON.StopIntent', null, "example-access-token");
-        return connect.request(req).then(function (r) {
-            return r.response;
-        }).then(res => {
-            expect(res).not.toHaveProperty("outputSpeech");
-        });
-    });
-});
+// describe('AMAZON.StopIntent', () => {
+//     test('should return nothing', () => {
+//         var req = generateRequest.intentRequest('AMAZON.StopIntent', null, "example-access-token");
+//         return connect.request(req).then(function (r) {
+//             return r.response;
+//         }).then(res => {
+//             expect(res).not.toHaveProperty("outputSpeech");
+//         });
+//     });
+// });
 
 describe('AMAZON.CancelIntent', () => {
     test('should return nothing', () => {
@@ -86,15 +86,15 @@ describe('AMAZON.CancelIntent', () => {
 });
 
 describe('PlayIntent', () => {
-    test('should PUT to Spotify play endpoint and recieve 204', () => {
-        nock("https://api.spotify.com")
-            .put("/v1/me/player/play")
-            .reply(204);
-        var req = generateRequest.intentRequest('PlayIntent');
-        return getRequestAttribute(req, 'statusCode').then(res => {
-            expect(res).toBe(204);
-        });
-    });
+    // test('should PUT to Spotify play endpoint and recieve 204', () => {
+    //     nock("https://api.spotify.com")
+    //         .put("/v1/me/player/play")
+    //         .reply(204);
+    //     var req = generateRequest.intentRequest('PlayIntent');
+    //     return getRequestAttribute(req, 'statusCode').then(res => {
+    //         expect(res).toBe(204);
+    //     });
+    // });
 
     test('should warn if not premium', () => {
         nock("https://api.spotify.com")
@@ -255,244 +255,244 @@ describe('VolumeLevelIntent', () => {
     });
 });
 
-describe('GetDevicesIntent', () => {
-    test('should find no devices', () => {
-        nock("https://api.spotify.com")
-            .get("/v1/me/player/devices")
-            .reply(200, { "devices": [] });
-        var req = generateRequest.intentRequest('GetDevicesIntent');
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("couldn't find any connect devices");
-        });
-    });
+// describe('GetDevicesIntent', () => {
+//     test('should find no devices', () => {
+//         nock("https://api.spotify.com")
+//             .get("/v1/me/player/devices")
+//             .reply(200, { "devices": [] });
+//         var req = generateRequest.intentRequest('GetDevicesIntent');
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("couldn't find any connect devices");
+//         });
+//     });
 
-    test('should find 1 device', () => {
-        nock("https://api.spotify.com")
-            .get("/v1/me/player/devices")
-            .reply(200, {
-                "devices": [device0]
-            });
-        var req = generateRequest.intentRequest('GetDevicesIntent');
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("My device");
-        });
-    });
+//     test('should find 1 device', () => {
+//         nock("https://api.spotify.com")
+//             .get("/v1/me/player/devices")
+//             .reply(200, {
+//                 "devices": [device0]
+//             });
+//         var req = generateRequest.intentRequest('GetDevicesIntent');
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("My device");
+//         });
+//     });
 
-    test('should handle errors with request', () => {
-        nock("https://api.spotify.com")
-            .get("/v1/me/player/devices")
-            .reply(503);
-        var req = generateRequest.intentRequest('GetDevicesIntent');
-        return getRequestAttribute(req, 'statusCode').then(res => {
-            expect(res).toBe(503);
-        });
-    });
-});
+//     test('should handle errors with request', () => {
+//         nock("https://api.spotify.com")
+//             .get("/v1/me/player/devices")
+//             .reply(503);
+//         var req = generateRequest.intentRequest('GetDevicesIntent');
+//         return getRequestAttribute(req, 'statusCode').then(res => {
+//             expect(res).toBe(503);
+//         });
+//     });
+// });
 
-describe('DevicePlayIntent', () => {
-    test('should warn if no slot value', () => {
-        var req = generateRequest.intentRequest('DevicePlayIntent');
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("couldn't work out which device number to play on");
-        });
-    });
+// describe('DevicePlayIntent', () => {
+//     test('should warn if no slot value', () => {
+//         var req = generateRequest.intentRequest('DevicePlayIntent');
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("couldn't work out which device number to play on");
+//         });
+//     });
 
-    test('should warn if not a number', () => {
-        var req = generateRequest.intentRequest('DevicePlayIntent', {
-            "DEVICENUMBER": {
-                "name": "DEVICENUMBER",
-                "value": "NaN"
-            }
-        });
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("refer to the device by number");
-        });
-    });
+//     test('should warn if not a number', () => {
+//         var req = generateRequest.intentRequest('DevicePlayIntent', {
+//             "DEVICENUMBER": {
+//                 "name": "DEVICENUMBER",
+//                 "value": "NaN"
+//             }
+//         });
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("refer to the device by number");
+//         });
+//     });
 
-    test('should PUT to Spotify endpoint with device in body', () => {
-        var api = nock("https://api.spotify.com", {
-            reqheaders: {
-                "Authorization": "Bearer example-access-token"
-            }
-        })
-            .put("/v1/me/player", {
-                "device_ids": [device0.id],
-                "play": true
-            })
-            .reply(204);
-        var requested = pEvent(api, 'request')
-            .then(() => {
-                return api.isDone();
-            });
-        var req = generateRequest.intentRequestSessionAttributes('DevicePlayIntent',
-            { "devices": [device0] },
-            {
-                "DEVICENUMBER": {
-                    "name": "DEVICENUMBER",
-                    "value": 1
-                }
-            }, "example-access-token");
-        connect.request(req);
-        return requested.then(res => {
-            expect(res).toBe(true);
-        });
-    });
+//     test('should PUT to Spotify endpoint with device in body', () => {
+//         var api = nock("https://api.spotify.com", {
+//             reqheaders: {
+//                 "Authorization": "Bearer example-access-token"
+//             }
+//         })
+//             .put("/v1/me/player", {
+//                 "device_ids": [device0.id],
+//                 "play": true
+//             })
+//             .reply(204);
+//         var requested = pEvent(api, 'request')
+//             .then(() => {
+//                 return api.isDone();
+//             });
+//         var req = generateRequest.intentRequestSessionAttributes('DevicePlayIntent',
+//             { "devices": [device0] },
+//             {
+//                 "DEVICENUMBER": {
+//                     "name": "DEVICENUMBER",
+//                     "value": 1
+//                 }
+//             }, "example-access-token");
+//         connect.request(req);
+//         return requested.then(res => {
+//             expect(res).toBe(true);
+//         });
+//     });
 
-    test('should warn if device not found', () => {
-        var deviceNumber = Math.floor(Math.random() * 10) + 2;
-        var req = generateRequest.intentRequestSessionAttributes('DevicePlayIntent',
-            { "devices": [device0] },
-            {
-                "DEVICENUMBER": {
-                    "name": "DEVICENUMBER",
-                    "value": deviceNumber
-                }
-            }, "example-access-token");
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("couldn't find device " + deviceNumber);
-        });
-    });
+//     test('should warn if device not found', () => {
+//         var deviceNumber = Math.floor(Math.random() * 10) + 2;
+//         var req = generateRequest.intentRequestSessionAttributes('DevicePlayIntent',
+//             { "devices": [device0] },
+//             {
+//                 "DEVICENUMBER": {
+//                     "name": "DEVICENUMBER",
+//                     "value": deviceNumber
+//                 }
+//             }, "example-access-token");
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("couldn't find device " + deviceNumber);
+//         });
+//     });
 
-    test('should use (empty) cache if new session', () => {
-        var req = generateRequest.intentRequestSessionAttributes('DevicePlayIntent', null, {
-            "DEVICENUMBER": {
-                "name": "DEVICENUMBER",
-                "value": 10
-            }
-        }, null, true);
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("couldn't find device");
-        });
-    });
+//     test('should use (empty) cache if new session', () => {
+//         var req = generateRequest.intentRequestSessionAttributes('DevicePlayIntent', null, {
+//             "DEVICENUMBER": {
+//                 "name": "DEVICENUMBER",
+//                 "value": 10
+//             }
+//         }, null, true);
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("couldn't find device");
+//         });
+//     });
 
-    test('should return nothing if no session', () => {
-        var req = generateRequest.intentRequestNoSession('DevicePlayIntent');
-        return connect.request(req).then(function (r) {
-            return r.response;
-        }).then(res => {
-            expect(res).not.toHaveProperty("outputSpeech");
-        });
-    });
+//     test('should return nothing if no session', () => {
+//         var req = generateRequest.intentRequestNoSession('DevicePlayIntent');
+//         return connect.request(req).then(function (r) {
+//             return r.response;
+//         }).then(res => {
+//             expect(res).not.toHaveProperty("outputSpeech");
+//         });
+//     });
 
-    test('should warn if not premium', () => {
-        nock("https://api.spotify.com")
-            .put("/v1/me/player")
-            .reply(403);
-        var req = generateRequest.intentRequestSessionAttributes('DevicePlayIntent',
-            { "devices": [device0] },
-            {
-                "DEVICENUMBER": {
-                    "name": "DEVICENUMBER",
-                    "value": 1
-                }
-            }, "example-access-token");
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("Make sure your Spotify account is premium");
-        });
-    });
-});
+//     test('should warn if not premium', () => {
+//         nock("https://api.spotify.com")
+//             .put("/v1/me/player")
+//             .reply(403);
+//         var req = generateRequest.intentRequestSessionAttributes('DevicePlayIntent',
+//             { "devices": [device0] },
+//             {
+//                 "DEVICENUMBER": {
+//                     "name": "DEVICENUMBER",
+//                     "value": 1
+//                 }
+//             }, "example-access-token");
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("Make sure your Spotify account is premium");
+//         });
+//     });
+// });
 
-describe('DeviceTransferIntent', () => {
-    test('should warn if no slot value', () => {
-        var req = generateRequest.intentRequest('DeviceTransferIntent');
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("couldn't work out which device number to transfer to");
-        });
-    });
+// describe('DeviceTransferIntent', () => {
+//     test('should warn if no slot value', () => {
+//         var req = generateRequest.intentRequest('DeviceTransferIntent');
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("couldn't work out which device number to transfer to");
+//         });
+//     });
 
-    test('should warn if not a number', () => {
-        var req = generateRequest.intentRequest('DeviceTransferIntent', {
-            "DEVICENUMBER": {
-                "name": "DEVICENUMBER",
-                "value": "NaN"
-            }
-        });
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("Try asking me to transfer to a device number");
-        });
-    });
+//     test('should warn if not a number', () => {
+//         var req = generateRequest.intentRequest('DeviceTransferIntent', {
+//             "DEVICENUMBER": {
+//                 "name": "DEVICENUMBER",
+//                 "value": "NaN"
+//             }
+//         });
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("Try asking me to transfer to a device number");
+//         });
+//     });
 
-    test('should PUT to Spotify endpoint with device in body', () => {
-        var api = nock("https://api.spotify.com", {
-            reqheaders: {
-                "Authorization": "Bearer example-access-token"
-            }
-        })
-            .put("/v1/me/player", {
-                "device_ids": [device0.id]
-            })
-            .reply(204);
-        var requested = pEvent(api, 'request')
-            .then(() => {
-                return api.isDone();
-            });
-        var req = generateRequest.intentRequestSessionAttributes('DeviceTransferIntent',
-            { "devices": [device0] },
-            {
-                "DEVICENUMBER": {
-                    "name": "DEVICENUMBER",
-                    "value": device0.number
-                }
-            }, "example-access-token");
-        connect.request(req);
-        return requested.then(res => {
-            expect(res).toBe(true);
-        });
-    });
+//     test('should PUT to Spotify endpoint with device in body', () => {
+//         var api = nock("https://api.spotify.com", {
+//             reqheaders: {
+//                 "Authorization": "Bearer example-access-token"
+//             }
+//         })
+//             .put("/v1/me/player", {
+//                 "device_ids": [device0.id]
+//             })
+//             .reply(204);
+//         var requested = pEvent(api, 'request')
+//             .then(() => {
+//                 return api.isDone();
+//             });
+//         var req = generateRequest.intentRequestSessionAttributes('DeviceTransferIntent',
+//             { "devices": [device0] },
+//             {
+//                 "DEVICENUMBER": {
+//                     "name": "DEVICENUMBER",
+//                     "value": device0.number
+//                 }
+//             }, "example-access-token");
+//         connect.request(req);
+//         return requested.then(res => {
+//             expect(res).toBe(true);
+//         });
+//     });
 
-    test('should warn if device not found', () => {
-        var deviceNumber = Math.floor(Math.random() * 10) + 2;
-        var req = generateRequest.intentRequestSessionAttributes('DeviceTransferIntent',
-            { "devices": [device0] },
-            {
-                "DEVICENUMBER": {
-                    "name": "DEVICENUMBER",
-                    "value": deviceNumber
-                }
-            }, "example-access-token");
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("couldn't find device " + deviceNumber);
-        });
-    });
+//     test('should warn if device not found', () => {
+//         var deviceNumber = Math.floor(Math.random() * 10) + 2;
+//         var req = generateRequest.intentRequestSessionAttributes('DeviceTransferIntent',
+//             { "devices": [device0] },
+//             {
+//                 "DEVICENUMBER": {
+//                     "name": "DEVICENUMBER",
+//                     "value": deviceNumber
+//                 }
+//             }, "example-access-token");
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("couldn't find device " + deviceNumber);
+//         });
+//     });
 
-    test('should use (empty) cache if new session', () => {
-        var req = generateRequest.intentRequestSessionAttributes('DeviceTransferIntent', null, {
-            "DEVICENUMBER": {
-                "name": "DEVICENUMBER",
-                "value": 10
-            }
-        }, null, true);
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("couldn't find device");
-        });
-    });
+//     test('should use (empty) cache if new session', () => {
+//         var req = generateRequest.intentRequestSessionAttributes('DeviceTransferIntent', null, {
+//             "DEVICENUMBER": {
+//                 "name": "DEVICENUMBER",
+//                 "value": 10
+//             }
+//         }, null, true);
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("couldn't find device");
+//         });
+//     });
 
-    test('should return nothing if no session', () => {
-        var req = generateRequest.intentRequestNoSession('DeviceTransferIntent');
-        return connect.request(req).then(function (r) {
-            return r.response;
-        }).then(res => {
-            expect(res).not.toHaveProperty("outputSpeech");
-        });
-    });
+//     test('should return nothing if no session', () => {
+//         var req = generateRequest.intentRequestNoSession('DeviceTransferIntent');
+//         return connect.request(req).then(function (r) {
+//             return r.response;
+//         }).then(res => {
+//             expect(res).not.toHaveProperty("outputSpeech");
+//         });
+//     });
 
-    test('should warn if not premium', () => {
-        nock("https://api.spotify.com")
-            .put("/v1/me/player")
-            .reply(403);
-        var req = generateRequest.intentRequestSessionAttributes('DeviceTransferIntent',
-            { "devices": [device0] },
-            {
-                "DEVICENUMBER": {
-                    "name": "DEVICENUMBER",
-                    "value": device0.number
-                }
-            }, "example-access-token");
-        return getRequestSSML(req).then(res => {
-            expect(res).toContain("Make sure your Spotify account is premium");
-        });
-    });
-});
+//     test('should warn if not premium', () => {
+//         nock("https://api.spotify.com")
+//             .put("/v1/me/player")
+//             .reply(403);
+//         var req = generateRequest.intentRequestSessionAttributes('DeviceTransferIntent',
+//             { "devices": [device0] },
+//             {
+//                 "DEVICENUMBER": {
+//                     "name": "DEVICENUMBER",
+//                     "value": device0.number
+//                 }
+//             }, "example-access-token");
+//         return getRequestSSML(req).then(res => {
+//             expect(res).toContain("Make sure your Spotify account is premium");
+//         });
+//     });
+// });
 
 describe('GetTrackIntent', () => {
     test('should give current playing track', () => {
