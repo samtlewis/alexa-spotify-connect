@@ -268,7 +268,6 @@ app.intent('PlayIntent', {
                     req.getSession().set("device", foundDevice);
 
                     // PUT to Spotify REST API
-                    res.say(i18n.__("Playing on " + deviceNameToUse));
                     return request.put({
                         url: "https://api.spotify.com/v1/me/player",
                         // Send access token as bearer auth
@@ -286,7 +285,25 @@ app.intent('PlayIntent', {
                         // Handle sending as JSON
                         json: true
                     }).then((r) => {
-                        res.say(i18n.__("OK"));
+                        return request.put({
+                            // Set to volume 35%
+                            url: "https://api.spotify.com/v1/me/player/volume?volume_percent=35",
+                            // Send access token as bearer auth
+                            auth: {
+                                "bearer": req.getSession().details.user.accessToken
+                            },
+                            body: {
+                                // Send device ID
+                                "device_ids": [
+                                    foundDevice.id
+                                ]
+                            },
+                                // Handle sending as JSON
+                            json: true
+                        }).catch((err) => {
+                            if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
+                        });
+                        res.say(i18n.__("OK."));
                     }).catch((err) => {
                         if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
                     });
