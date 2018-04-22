@@ -11,7 +11,11 @@ var express_app = express();
 // Create instance of alexa-app
 var app = new alexa.app('connect');
 // Bind alexa-app to express instance
-app.express({ expressApp: express_app });
+app.express({
+    debug: true, // comment this line out for production/distribution
+    checkCert: false, // comment this line out for production/distribution
+    expressApp: express_app
+});
 
 i18n.configure({
     directory: __dirname + '/locales'
