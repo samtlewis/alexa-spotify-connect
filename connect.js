@@ -28,6 +28,7 @@ var pause = function (req, res) {
     }).auth(null, null, true, req.getSession().details.user.accessToken)
         .then((r) => {
             req.getSession().set("statusCode", r.statusCode);
+            res.say(i18n.__("Paused."));
         }).catch((err) => {
             if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
         });
@@ -69,7 +70,7 @@ app.intent("AMAZON.HelpIntent", {
     "slots": {},
     "utterances": []
 }, function (req, res) {
-    res.say(i18n.__("Try asking me to play your favorite song. You need a spotify connect device called " + deviceNameToUse))
+    res.say(i18n.__("When you have music playing, ask me to play and I'll transfer it to your Spotify connect device called " + deviceNameToUse))
         .reprompt(i18n.__("What would you like to do?"));
     // Keep session open
     res.shouldEndSession(false);
@@ -110,6 +111,7 @@ app.intent('ResumeIntent', {
         }).auth(null, null, true, req.getSession().details.user.accessToken)
             .then((r) => {
                 req.getSession().set("statusCode", r.statusCode);
+                res.say(i18n.__("Unpaused."));
             }).catch((err) => {
                 if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
             });
@@ -142,6 +144,7 @@ app.intent('SkipNextIntent', {
         }).auth(null, null, true, req.getSession().details.user.accessToken)
             .then((r) => {
                 req.getSession().set("statusCode", r.statusCode);
+                res.say(i18n.__("Skipping to the next song."));
             }).catch((err) => {
                 if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
             });
@@ -165,6 +168,7 @@ app.intent('SkipPreviousIntent', {
         }).auth(null, null, true, req.getSession().details.user.accessToken)
             .then((r) => {
                 req.getSession().set("statusCode", r.statusCode);
+                res.say(i18n.__("Going back a song."));
             }).catch((err) => {
                 if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
             });
@@ -192,6 +196,7 @@ app.intent('VolumeLevelIntent', {
                     // Check that the volume is valid
                     if (volumeLevel >= 0 && volumeLevel <= 10) {
                         // PUT to Spotify REST API
+                        res.say(i18n.__("Volume " + volumeLevel));                
                         return request.put({
                             // Send new volume * 10 (convert to percentage)
                             url: "https://api.spotify.com/v1/me/player/volume?volume_percent=" + 10 * volumeLevel,
@@ -263,6 +268,7 @@ app.intent('PlayIntent', {
                     req.getSession().set("device", foundDevice);
 
                     // PUT to Spotify REST API
+                    res.say(i18n.__("Playing on " + deviceNameToUse));
                     return request.put({
                         url: "https://api.spotify.com/v1/me/player",
                         // Send access token as bearer auth
