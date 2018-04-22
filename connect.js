@@ -285,9 +285,10 @@ app.intent('PlayIntent', {
                         // Handle sending as JSON
                         json: true
                     }).then((r) => {
+                        res.say(i18n.__("OK."));
                         return request.put({
                             // Set to volume 35%
-                            url: "https://api.spotify.com/v1/me/player/volume?volume_percent=35",
+                            url: "https://api.spotify.com/v1/me/player/volume?volume_percent=40",
                             // Send access token as bearer auth
                             auth: {
                                 "bearer": req.getSession().details.user.accessToken
@@ -300,10 +301,11 @@ app.intent('PlayIntent', {
                             },
                                 // Handle sending as JSON
                             json: true
+                        }).then((r) => {
+                            res.say(i18n.__("Volume 4"));
                         }).catch((err) => {
                             if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
                         });
-                        res.say(i18n.__("OK."));
                     }).catch((err) => {
                         if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
                     });
