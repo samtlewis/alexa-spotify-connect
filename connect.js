@@ -6,6 +6,11 @@ var i18n = require('i18n');
 // DEVICE NAME
 var deviceNameToUse = 'Living Room';
 
+// MAX VOLUME WHEN TRANSFERRING PLAYBACK (you can still manually set volume higher than this), 0-100
+var maxVolumePercent = 60;
+
+// END CONFIGURABLE ITEMS
+
 // Create instance of express
 var express_app = express();
 // Create instance of alexa-app
@@ -267,6 +272,14 @@ app.intent('PlayIntent', {
                 if (foundDevice) {
                     req.getSession().set("device", foundDevice);
 
+                    var volume = foundDevice.volume_percent;
+                    if (!volume) {
+                        volume = 40;
+                    }
+                    volume = Math.max(volume, maxVolumePercent);
+
+                    res.say(i18n.__("OK, volume " + (volume/10)));
+
                     // PUT to Spotify REST API
                     return request.put({
                         url: "https://api.spotify.com/v1/me/player",
@@ -285,10 +298,9 @@ app.intent('PlayIntent', {
                         // Handle sending as JSON
                         json: true
                     }).then((r) => {
-                        res.say(i18n.__("OK."));
                         return request.put({
                             // Set to volume 35%
-                            url: "https://api.spotify.com/v1/me/player/volume?volume_percent=40",
+                            url: "https://api.spotify.com/v1/me/player/volume?volume_percent=" + volume,
                             // Send access token as bearer auth
                             auth: {
                                 "bearer": req.getSession().details.user.accessToken
@@ -299,10 +311,10 @@ app.intent('PlayIntent', {
                                     foundDevice.id
                                 ]
                             },
-                                // Handle sending as JSON
+                            // Handle sending as JSON
                             json: true
                         }).then((r) => {
-                            res.say(i18n.__("Volume 4"));
+                            res.say(i18n.__("Status code is " + r.statusCode));
                         }).catch((err) => {
                             if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
                         });
