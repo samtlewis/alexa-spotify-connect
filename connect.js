@@ -271,14 +271,7 @@ app.intent('PlayIntent', {
                 }
                 if (foundDevice) {
                     req.getSession().set("device", foundDevice);
-
-                    var volume = foundDevice.volume_percent;
-                    if (!volume) {
-                        volume = 40;
-                    }
-                    volume = Math.min(volume, maxVolumePercent);
-
-                    res.say(i18n.__("OK, volume " + (volume/10)));
+                    res.say(i18n.__("OK"));
 
                     // PUT to Spotify REST API
                     return request.put({
@@ -298,27 +291,16 @@ app.intent('PlayIntent', {
                         // Handle sending as JSON
                         json: true
                     }).then((r) => {
-                        return request.put({
-                            url: "https://api.spotify.com/v1/me/player/volume?volume_percent=" + volume,
-                            auth: {
-                                "bearer": req.getSession().details.user.accessToken
-                            },
-                            body: {
-                                "device_ids": [
-                                    foundDevice.id
-                                ]
-                            },
-                            json: true
-                        }).then((r) => {
-                            res.say(i18n.__("Good. Status code is " + r.statusCode));
-                        }).catch((err) => {
-                            res.say(i18n.__("Error. Status code is " + err.statusCode));
-                            if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
+                        // Keep session open
+                        res.card({
+                            type: "Simple",
+                            title: "Playing on " + deviceNameToUse, // this is not required for type Simple
+                            content: "Device ID: " + foundDevice.id + "\nVolume: " + foundDevice.volume_percent
                         });
+                        res.shouldEndSession(false);
                     }).catch((err) => {
                         if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
                     });
-
                 } else { // no foundDevice
                     res.say(i18n.__("I could not find the spotify connect device called " + deviceNameToUse));
                 }
