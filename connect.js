@@ -276,7 +276,7 @@ app.intent('PlayIntent', {
                     if (!volume) {
                         volume = 40;
                     }
-                    volume = Math.max(volume, maxVolumePercent);
+                    volume = Math.min(volume, maxVolumePercent);
 
                     res.say(i18n.__("OK, volume " + (volume/10)));
 
@@ -299,23 +299,20 @@ app.intent('PlayIntent', {
                         json: true
                     }).then((r) => {
                         return request.put({
-                            // Set to volume 35%
                             url: "https://api.spotify.com/v1/me/player/volume?volume_percent=" + volume,
-                            // Send access token as bearer auth
                             auth: {
                                 "bearer": req.getSession().details.user.accessToken
                             },
                             body: {
-                                // Send device ID
                                 "device_ids": [
                                     foundDevice.id
                                 ]
                             },
-                            // Handle sending as JSON
                             json: true
                         }).then((r) => {
-                            res.say(i18n.__("Status code is " + r.statusCode));
+                            res.say(i18n.__("Good. Status code is " + r.statusCode));
                         }).catch((err) => {
+                            res.say(i18n.__("Error. Status code is " + err.statusCode));
                             if (err.statusCode === 403) res.say(i18n.__("Make sure your Spotify account is premium"));
                         });
                     }).catch((err) => {
