@@ -17,8 +17,8 @@ var express_app = express();
 var app = new alexa.app('connect');
 // Bind alexa-app to express instance
 app.express({
-    debug: true, // comment this line out for production/distribution
-    checkCert: false, // comment this line out for production/distribution
+    debug: false, // comment this line out for production/distribution
+    checkCert: true, // comment this line out for production/distribution
     expressApp: express_app
 });
 
