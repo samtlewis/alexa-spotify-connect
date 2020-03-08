@@ -357,7 +357,7 @@ app.intent('GetTrackIntent', {
 express_app.use(express.static(__dirname));
 /* istanbul ignore next */
 express_app.get('/', function (req, res) {
-    res.redirect('https://github.com/xaphod/alexa-spotify-connect');
+    res.redirect('https://github.com/samtlewis/alexa-spotify-connect');
 });
 
 /* istanbul ignore if */
