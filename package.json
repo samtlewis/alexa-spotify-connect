@@ -30,7 +30,7 @@
     "url": "git+https://github.com/xaphod/alexa-spotify-connect.git"
   },
   "alexa": {
-    "applicationId": "amzn1.ask.skill.cff2d0af-01a4-4e24-a05d-4e6b641abd48"
+    "applicationId": "amzn1.ask.skill.c2bfb6d0-274d-429d-8dac-39ba676deb59"
   },
   "jest": {
     "coverageReporters": [
