@@ -4,7 +4,7 @@ var express = require('express');
 var i18n = require('i18n');
 
 // DEVICE NAME
-var deviceNameToUse = 'Living Room';
+var deviceNameToUse = 'Insignia';
 
 // MAX VOLUME WHEN TRANSFERRING PLAYBACK (you can still manually set volume higher than this), 0-100
 var maxVolumePercent = 60;
